@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  #--- SERVIÇO DE PRODUTOS ---
+  db_produtos:
+    image: postgres:15.3-alpine3.18
+    volumes:
+      - postgres_data_produtos:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=produtos_db
+    networks:
+      - microservico-net
+
+  servico-produtos:
+    build: ./servico_produtos
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./servico_produtos:/app
+    ports:
+      - "8001:8000" # Acessível em http://localhost:8001
+    depends_on:
+      - db_produtos
+    networks:
+      - microservico-net
+
+  #--- SERVIÇO DE SETORES ---
+  db_setores:
+    image: postgres:15.3-alpine3.18
+    volumes:
+      - postgres_data_setores:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=setores_db
+    networks:
+      - microservico-net
+
+  servico-setores:
+    build: ./servico_setores
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./servico_setores:/app
+    ports:
+      - "8002:8000" # Acessível em http://localhost:8002
+    depends_on:
+      - db_setores
+    networks:
+      - microservico-net
+
+  #--- SERVIÇO DE MOVIMENTAÇÕES ---
+  db_movimentacoes:
+    image: postgres:15.3-alpine3.18
+    volumes:
+      - postgres_data_movimentacoes:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=movimentacoes_db
+    networks:
+      - microservico-net
+
+  servico-movimentacoes:
+    build: ./servico_movimentacoes
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./servico_movimentacoes:/app
+    ports:
+      - "8003:8000" # Acessível em http://localhost:8003
+    depends_on:
+      - db_movimentacoes
+    networks:
+      - microservico-net
+
+# Definindo volumes para persistir os dados dos bancos
+volumes:
+  postgres_data_produtos:
+  postgres_data_setores:
+  postgres_data_movimentacoes:
+
+# Definindo a rede para comunicação interna
+networks:
+  microservico-net:
+    driver: bridge
